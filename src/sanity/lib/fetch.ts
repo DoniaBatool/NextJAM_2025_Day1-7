@@ -1,4 +1,6 @@
-import { client } from "../../../sanity-migration/sanityClient";
+import { allproducts } from "@/sanity/lib/queries";
+import { client } from "./client";
+
 
 export async function sanityFetch({
   query,
@@ -14,7 +16,6 @@ export async function sanityFetch({
 //const data :Product= await sanityFetch({ query: });
 
 
-import { allproducts } from "@/sanity/lib/queries";
 
 export async function fetchAllProducts() {
   return await sanityFetch({ query: allproducts });
