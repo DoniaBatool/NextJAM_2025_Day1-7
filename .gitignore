@@ -9,8 +9,7 @@
 # testing
 /coverage
 
-#sanity_migration
-sanity-migration/sanityClient.js
+
 
 # next.js
 /.next/
