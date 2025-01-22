@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const sanityClient_js_1 = require("./sanityClient.js");
 const slugify_1 = __importDefault(require("slugify"));
+const dotenv = require('dotenv');
+dotenv.config(); 
 // async function uploadImageToSanity(imageUrl: string): Promise<string|null> {
 //   try {
 //     // Fetch the image from the URL and convert it to a buffer
