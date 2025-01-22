@@ -11,6 +11,14 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        mytext: '#2A254B',
+      },
+      fontFamily: {
+        clash: ['Clash Display', 'sans-serif'],
+        satoshi: ['Satoshi', 'sans-serif'],
+      },
+      screens: {
+        xs: '410px',
       },
     },
   },
