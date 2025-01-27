@@ -1,5 +1,7 @@
 import { allproducts } from "@/sanity/lib/queries";
 import { client } from "./client";
+;
+
 
 
 export async function sanityFetch({

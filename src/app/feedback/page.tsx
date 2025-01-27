@@ -1,5 +1,6 @@
 "use client";
 import { generateAIComment } from "@/api/huggingFace/route";
+import { client } from "@/sanity/lib/client";
 import React, { useState } from "react";
 
 const FeedbackPage = () => {
@@ -65,15 +66,54 @@ const FeedbackPage = () => {
     return isValid;
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
+  
     if (!validateForm()) return;
-
-    console.log("Feedback submitted!");
-
-    setSuccessMessage("Thank you for your feedback!");
-    setTimeout(() => {
+  
+    setIsLoading(true);
+  
+    try {
+      // Define the type of feedback data
+      type FeedbackData = {
+        _type: string;
+        name: string;
+        email: string;
+        orderId: string | null;
+        feedbackType: string;
+        comments: string;
+        rating: number | null;
+        image?: {
+          _type: string;
+          asset: { _ref: string };
+        }; // Optional image property
+      };
+  
+      // Construct the data object to send to Sanity
+      const feedbackData: FeedbackData = {
+        _type: "feedback",
+        name: formData.name,
+        email: formData.email,
+        orderId: formData.orderId || null,
+        feedbackType: formData.feedbackType,
+        comments: formData.comments,
+        rating: rating || null,
+      };
+  
+      // Upload the file to Sanity if available
+      if (selectedFile) {
+        const imageData = await client.assets.upload("image", selectedFile);
+        feedbackData.image = {
+          _type: "image",
+          asset: { _ref: imageData._id },
+        };
+      }
+  
+      // Save the feedback document in Sanity
+      await client.create(feedbackData);
+  
+      // Reset form and show success message
+      setSuccessMessage("Thank you for your feedback!");
       setFormData({
         name: "",
         email: "",
@@ -83,10 +123,16 @@ const FeedbackPage = () => {
       });
       setRating(0);
       setSelectedFile(null);
-      setSuccessMessage("");
-    }, 5000);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      setSuccessMessage(
+        "There was an error submitting your feedback. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
-
+  
   const handleGenerateAIComment = async () => {
     setIsLoading(true);
     try {

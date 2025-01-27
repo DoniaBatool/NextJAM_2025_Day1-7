@@ -1,19 +1,43 @@
-
-import React from "react";
+"use client"
+import React, { useState, useEffect } from "react";
 import Topbar from "@/app/components/topbar";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { faqQuery } from "@/sanity/lib/queries";
 import PrivacyPolicy from "../components/privacyPolicy";
 import LicensePage from "../components/license";
 
-interface faq{
-    question:string;
-    answer:string;
+interface faq {
+  question: string;
+  answer: string;
 }
 
-const FAQPage = async () => {
-  // Fetch FAQs from Sanity
-  const faqs:faq[] = await sanityFetch({ query: faqQuery });
+const FAQPage = () => {
+  const [faqs, setFaqs] = useState<faq[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await sanityFetch({ query: faqQuery });
+        setFaqs(data);
+      } catch (error) {
+        setError("Failed to load FAQs. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <>
@@ -37,8 +61,8 @@ const FAQPage = async () => {
         </div>
       </section>
 
-      <PrivacyPolicy/>
-      <LicensePage/>
+      <PrivacyPolicy />
+      <LicensePage />
     </>
   );
 };

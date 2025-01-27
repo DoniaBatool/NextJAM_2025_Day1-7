@@ -61,7 +61,7 @@ const Chatbot = () => {
 
       {/* Popup Message */}
       {showPopup && (
-        <div className="absolute bottom-20 right-6 bg-gray-800 text-white px-3 py-2 rounded-md shadow-md z-50">
+        <div className="fixed bottom-20 right-6 bg-gray-800 text-white px-3 py-2 rounded-md shadow-md z-50">
           I am a helpbot!
         </div>
       )}

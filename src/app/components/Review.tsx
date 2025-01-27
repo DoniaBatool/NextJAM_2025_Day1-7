@@ -1,18 +1,18 @@
 "use client";
-import { useState } from "react";
+import { client } from "@/sanity/lib/client";
+import { useState, useEffect, useRef } from "react";
 
 interface Review {
   rating: number;
   review: string;
   reviewer: string;
-  
 }
 
 export interface myProps {
   productId: string;
 }
 
-const ReviewSection = ({ productId}:myProps) => {
+const ReviewSection = ({ productId }: myProps) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [rating, setRating] = useState<number>(0);
   const [reviewText, setReviewText] = useState<string>("");
@@ -20,7 +20,30 @@ const ReviewSection = ({ productId}:myProps) => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>("");
 
-  const handleSubmit = () => {
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    // Fetch reviews when the component mounts
+    const fetchReviews = async () => {
+      try {
+        const data: Review[] = await client.fetch(
+          `*[_type == "review" && productId == $productId]`,
+          { productId }
+        );
+        setReviews(data);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+
+    fetchReviews();
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, [productId]);
+
+  const handleSubmit = async () => {
     if (!rating || !reviewText || !reviewerName) {
       alert("Please fill out all fields.");
       return;
@@ -28,32 +51,49 @@ const ReviewSection = ({ productId}:myProps) => {
 
     setIsSubmitting(true);
 
-    // Simulate adding the review (this could be an API call to save data in a database)
     const newReview: Review = {
       rating,
       review: reviewText,
       reviewer: reviewerName,
     };
 
-    setReviews((prev) => [...prev, newReview]);
+    try {
+      // Send data to Sanity
+      await client.create({
+        _type: "review",
+        rating,
+        review: reviewText,
+        reviewer: reviewerName,
+        productId,
+      });
 
-    // Show success message
-    setSuccessMessage("Your review has been submitted successfully!");
-    console.log(`Submitting review for product ID: ${productId}`);
-    // Reset the form fields after submission
-    setRating(0);
-    setReviewText("");
-    setReviewerName("");
-    setIsSubmitting(false);
+      // Add the review to the local state
+      if (isMounted.current) {
+        setReviews((prev) => [...prev, newReview]);
 
-    // Hide success message after 3 seconds
-    setTimeout(() => setSuccessMessage(""), 3000);
+        // Show success message for 10 seconds
+        setSuccessMessage("Your review has been submitted successfully!");
+        setTimeout(() => setSuccessMessage(""), 10000);
+
+        // Reset the form fields
+        setRating(0);
+        setReviewText("");
+        setReviewerName("");
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("There was an error submitting your review. Please try again.");
+    } finally {
+      if (isMounted.current) {
+        setIsSubmitting(false);
+      }
+    }
   };
 
   return (
     <div className="bg-white max-w-3xl p-6 rounded-lg mt-10">
       <h3 className="text-2xl font-semibold text-gray-800 mb-6">
-        Customer Reviews 
+        Customer Reviews
       </h3>
 
       {/* Success Message */}
@@ -71,7 +111,9 @@ const ReviewSection = ({ productId}:myProps) => {
             {[1, 2, 3, 4, 5].map((star) => (
               <span
                 key={star}
-                className={`cursor-pointer text-lg ${star <= rating ? "text-yellow-500" : "text-gray-400"}`}
+                className={`cursor-pointer text-lg ${
+                  star <= rating ? "text-yellow-500" : "text-gray-400"
+                }`}
                 onClick={() => setRating(star)}
               >
                 ★
@@ -112,21 +154,34 @@ const ReviewSection = ({ productId}:myProps) => {
 
       {/* Reviews Display */}
       <div>
-        <h4 className="text-xl font-semibold text-gray-800">Reviews & Rating ({reviews.length})</h4>
+        <h4 className="text-xl font-semibold text-gray-800">
+          Reviews & Rating ({reviews.length})
+        </h4>
         <div className="space-y-3 mt-4">
           {reviews.length === 0 ? (
-            <p className="text-gray-500">No reviews yet. Be the first to review this product!</p>
+            <p className="text-gray-500">
+              No reviews yet. Be the first to review this product!
+            </p>
           ) : (
-            reviews.map((review, index) => (
-              <div key={index} className="p-4 border-b border-gray-200">
+            reviews.map((review) => (
+              <div
+                key={`${review.reviewer}-${Math.random()}`}
+                className="p-4 border-b border-gray-200"
+              >
                 <div className="flex items-center gap-2 mb-2">
-                  <p className="text-gray-700 font-semibold">{review.reviewer}</p>
+                  <p className="text-gray-700 font-semibold">
+                    {review.reviewer}
+                  </p>
                   {/* Rating Stars */}
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <span
                         key={star}
-                        className={`text-lg ${star <= review.rating ? "text-yellow-500" : "text-gray-400"}`}
+                        className={`text-lg ${
+                          star <= review.rating
+                            ? "text-yellow-500"
+                            : "text-gray-400"
+                        }`}
                       >
                         ★
                       </span>

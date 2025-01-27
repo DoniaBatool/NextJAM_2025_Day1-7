@@ -1,3 +1,5 @@
+
+import CartActions from "@/app/components/CartAction";
 import ProductCategory from "@/app/components/categoryFetch";
 import Club from "@/app/components/club";
 import Feature from "@/app/components/feature";
@@ -6,7 +8,7 @@ import ReviewSection from "@/app/components/Review";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { Product } from "@/sanity/lib/types";
 import Image from "next/image";
-import Link from "next/link";
+
 
 
 
@@ -84,7 +86,7 @@ const ProductDetailPage = async ({ params }: Props) => {
         </div>
 
         {/* Right div (Product details) */}
-        <div className="w-full md:ml-[30px] lg:ml-[60px] lg:mt-[20px] flex flex-col gap-[20px] lg:gap-[50px]  px-6">
+        <div className="w-full md:ml-[30px] lg:ml-[60px]  flex flex-col gap-[20px] lg:gap-[30px]  px-6">
 
           {/* Product Name and Price */}
           <div className="gap-[13px]">
@@ -99,7 +101,7 @@ const ProductDetailPage = async ({ params }: Props) => {
               {product.description}
             </p>
 
-            <div className="w-full md:w-1/2 ml-5 mt-[30px]">
+            <div className="w-full md:w-1/2 ml-5 mt-[10px]">
              
               
 
@@ -110,7 +112,7 @@ const ProductDetailPage = async ({ params }: Props) => {
               </ul>
             </div>
             {/* Product Dimensions */}
-            <div className="flex flex-col gap-[30px] mt-[30px]">
+            <div className="flex flex-col gap-[30px] mt-[20px]">
               <div><p className="font-clash text-[16px] text-mytext">Dimensions</p></div>
               <div className="flex flex-col gap-[12px]">
                 <div>
@@ -130,20 +132,15 @@ const ProductDetailPage = async ({ params }: Props) => {
               </div>
             </div>
 
-            {/* Amount and Add to Cart */}
-            <div className="flex flex-col xs:flex-row gap-[70px] mt-[40px] sm:gap-[100px] md:gap-[40px] items-center  ">
-              <div className="flex gap-[20px] sm:gap-[50px] md:gap-[20px] items-center mb-3 xs:mb-0">
-                <p className="font-clash text-[16px] text-mytext">Amount</p>
-                <div className="flex gap-[30px] w-[122px] h-[46px] cursor-pointer px-[16px] py-[12px] bg-slate-200 hover:border hover:border-[#4E4D93]">
-                  <p className="font-satoshi text-[18px] text-mytext">+</p>
-                  <p className="font-satoshi text-[16px] text-mytext">1</p>
-                  <p className="font-satoshi text-[18px] text-mytext">-</p>
-                </div>
-              </div>
-              <button className="w-full h-[46px] hover:bg-slate-600 xs:w-[143px] px-[16px] py-[12px] bg-mytext  text-white font-satoshi leading-[150%] text-[16px] border border-[#4E4D93] text-nowrap">
-               <Link href="/cart">Add to cart</Link></button>
-            </div>
-           
+           {/* Cart Actions */}
+           <CartActions
+              productId={product._id}
+              productName={product.name}
+              productPrice={product.price}
+              initialStock={product.quantity}
+              productImage={product.imageUrl}
+              productDescription={product.description} 
+                         />
           </div>
          
         </div>

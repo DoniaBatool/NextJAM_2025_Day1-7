@@ -218,4 +218,81 @@ export const faqQuery = `
 `;
 
 
- 
+export const allproductsByPrice = `
+  *[_type == "product" && price >= $minPrice && price <= $maxPrice] {
+     _id,
+      name,
+      description,
+      "slug": slug.current,
+      "category": category->{name},
+      price,
+      tags,
+      dimensions,
+      quantity,
+      features,
+      "imageUrl": image.asset->url
+  }
+`;
+
+export const allproductsSortedBy = `
+  *[_type == "product"] | order(price $sortOrder) {
+    _id,
+      name,
+      description,
+      "slug": slug.current,
+      "category": category->{name},
+      price,
+      tags,
+      dimensions,
+      quantity,
+      features,
+      "imageUrl": image.asset->url
+  }
+`;
+
+// Example query for searching products in Sanity
+export const searchProducts = `
+  *[_type == "product" && name match $searchTerm] {
+    _id,
+    name,
+    price,
+    slug,
+    category->{
+      name
+    },
+    imageUrl
+  }
+`;
+
+
+export const productsByTagQuery = (tag: string) => `
+*[_type == "product" && "${tag}" in tags]{
+  _id,
+  name,
+  description,
+  "slug": slug.current,
+  "category": category->{name},
+  price,
+  tags,
+  dimensions,
+  quantity,
+  features,
+  "imageUrl": image.asset->url
+}
+`;
+// Sanity query function for products by category
+export const productsByCategoryQuery = (category: string) => `
+*[_type == "product" && category->name == "${category}"]{
+  _id,
+  name,
+  description,
+  "slug": slug.current,
+  "category": category->{name},
+  price,
+  tags,
+  dimensions,
+  quantity,
+  features,
+  "imageUrl": image.asset->url
+}
+`;

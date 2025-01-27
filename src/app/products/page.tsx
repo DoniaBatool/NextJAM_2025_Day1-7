@@ -1,18 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { RiArrowDropDownFill } from "react-icons/ri";
+import Link from 'next/link'; // Import Link from Next.js
+import { RiArrowDropDownFill } from 'react-icons/ri';
 import { ProductCardE } from '../components/productCard';
-import Link from "next/link";
 import Topbar from '../components/topbar';
-import { eightproducts, allproducts } from '@/sanity/lib/queries';
+import { eightproducts, allproducts, allproductsByPrice, allproductsSortedBy } from '@/sanity/lib/queries';
 import { Product } from '@/sanity/lib/types';
 import { sanityFetch } from '@/sanity/lib/fetch';
+
 
 export default function Productspage() {
   const [products, setProducts] = useState<Product[]>([]); // Store fetched products
   const [isShowingAllProducts, setIsShowingAllProducts] = useState(false); // State toggle
+  const [dropdown, setDropdown] = useState<{ [key: string]: boolean }>({
+    categories: false,
+    tags: false,
+    prices: false,
+    sorting: false,
+  }); // Dropdown visibility
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch initial 8 products
   useEffect(() => {
@@ -21,6 +29,25 @@ export default function Productspage() {
       setProducts(initialData);
     };
     fetchInitialProducts();
+  }, []);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdown({
+          categories: false,
+          tags: false,
+          prices: false,
+          sorting: false,
+        });
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
   // Fetch all products on button click
@@ -32,83 +59,188 @@ export default function Productspage() {
     }
   };
 
+  // Handle dropdown toggle
+  const toggleDropdown = (menu: string) => {
+    setDropdown((prev) => ({
+      ...prev,
+      [menu]: !prev[menu],
+    }));
+  };
+
+  // Fetch products based on price range
+  const handlePriceFilter = async (minPrice: number, maxPrice: number) => {
+    try {
+      const filteredProducts: Product[] = await sanityFetch({
+        query: allproductsByPrice,
+        params: { minPrice, maxPrice }, // Pass price range as params
+      });
+
+      setProducts(filteredProducts); // Update products state
+      setDropdown((prev) => ({ ...prev, prices: false })); // Close dropdown
+    } catch (error) {
+      console.error('Error fetching products by price range:', error);
+    }
+  };
+
+  // Fetch products sorted by price
+ // Handle Sort by Price
+const handleSort = async (sortOrder: "asc" | "desc") => {
+  try {
+    // Define GROQ query for sorting
+    const query = allproductsSortedBy; // use the existing `allproductsSortedBy` query from your queries file.
+    const sortedProducts: Product[] = await sanityFetch({
+      query,
+      params: { sortOrder }, // Pass sortOrder as parameter
+    });
+
+    // Update the state with the sorted products
+    setProducts(sortedProducts);
+    setDropdown((prev) => ({ ...prev, sorting: false })); // Close dropdown
+  } catch (error) {
+    console.error("Error fetching sorted products:", error);
+  }
+};
+
+  // Categories and Tags Data
+  const categories = ['Lamps', 'Beds', 'Sofas', 'Tables', 'Ceramics', 'Plantpots', 'Chairs'];
+  const tags = ['Luxury', 'New Arrival', 'Antique', 'Modern', 'Decor', 'Popular Products', 'Comfy'];
+  const priceRanges = [
+    { label: '0-100 Pounds', minPrice: 0, maxPrice: 100 },
+    { label: '100-500 Pounds', minPrice: 100, maxPrice: 500 },
+    { label: '500-1000 Pounds', minPrice: 500, maxPrice: 1000 },
+  ];
+  const sortOptions = [
+    { label: 'Lowest to Highest', sortOrder: 'asc' },
+    { label: 'Highest to Lowest', sortOrder: 'desc' },
+  ];
+
   return (
-    <div className="max-w-[1440px] mx-auto ">
+    <div className="max-w-[1440px] mx-auto" ref={dropdownRef}>
       <Topbar />
-      {/* Header Image */}
-      <Image
-        src="/products/Frame.png"
-        alt="frame"
-        width={1440}
-        height={209}
-        className="w-full"
-      />
+      <Image src="/products/Frame.png" alt="frame" width={1440} height={209} className="w-full" />
 
       {/* Filters and Sorting */}
       <div className="flex flex-wrap justify-between items-center px-4 sm:px-6 lg:px-8 gap-y-4 mt-8">
-        {/* Mobile Filters and Sorting */}
-        <div className="flex sm:hidden justify-between gap-4 w-full">
-          <button className="bg-gray-100 w-[163px] rounded-sm px-[16px] py-[12px] text-[14px]
-           sm:text-[16px] font-satoshi text-mytext flex justify-center place-items-center">
-            Filters <RiArrowDropDownFill />
-          </button>
-          <button className="bg-gray-100 w-[163px] rounded-sm px-[16px] py-[12px] text-[14px] 
-          sm:text-[16px] font-satoshi text-mytext flex justify-center items-center">
-            Sorting <RiArrowDropDownFill />
-          </button>
-        </div>
-
-        {/* Desktop Filters */}
-        <div className="hidden sm:flex flex-wrap gap-4 sm:gap-[12px] font-satoshi text-mytext text-[14px] sm:text-[16px] leading-[150%]">
-          <Link href="/products/1">
-            <button className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center">
+        <div className="flex flex-wrap gap-4 sm:gap-[12px] font-satoshi text-mytext text-[14px] sm:text-[16px] leading-[150%]">
+          {/* Category Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => toggleDropdown('categories')}
+              className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center bg-gray-100 hover:bg-gray-200 rounded-md"
+            >
               Category <RiArrowDropDownFill />
             </button>
-          </Link>
-          <Link href="/products/1">
-            <button className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center">
+            {dropdown.categories && (
+              <ul className="absolute left-0 bg-white border shadow-lg rounded-md py-2 mt-2 z-50 min-w-[200px]">
+                {categories.map((category) => (
+                  <li
+                    key={category}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  >
+                    <Link href={`/products/${category}`}>{category}</Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Product Tags Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => toggleDropdown('tags')}
+              className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center bg-gray-100 hover:bg-gray-200 rounded-md"
+            >
               Product Tags <RiArrowDropDownFill />
             </button>
-          </Link>
-          <button className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center">
-            Price <RiArrowDropDownFill />
-          </button>
-          <button className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center">
-            Filter <RiArrowDropDownFill />
-          </button>
-        </div>
+            {dropdown.tags && (
+              <ul className="absolute left-0 bg-white border shadow-lg rounded-md py-2 mt-2 z-50 min-w-[200px]">
+                {tags.map((tag) => (
+                  <li
+                    key={tag}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  >
+                    <Link href={`/tags/${tag.toLowerCase()}`}>{tag}</Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-        {/* Sorting Options */}
-        <div className="hidden  sm:flex flex-wrap  font-satoshi
-         text-mytext text-[14px] sm:text-[16px] leading-[150%]">
-          <button className="flex items-center mr-[20px] px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center">
-            Sorting by <RiArrowDropDownFill />
-          </button>
+          {/* Price Filter Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => toggleDropdown('prices')}
+              className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center bg-gray-100 hover:bg-gray-200 rounded-md"
+            >
+              Filter <RiArrowDropDownFill />
+            </button>
+            {dropdown.prices && (
+              <ul className="absolute left-0 bg-white border shadow-lg rounded-md py-2 mt-2 z-50 min-w-[200px]">
+                {priceRanges.map((price) => (
+                  <li
+                    key={price.label}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handlePriceFilter(price.minPrice, price.maxPrice)}
+                  >
+                    {price.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Sorting Dropdown */}
+          <div className="relative">
+        <button
+          onClick={() => toggleDropdown("sorting")}
+          className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center bg-gray-100 hover:bg-gray-200 rounded-md"
+        >
+          Sort <RiArrowDropDownFill />
+        </button>
+        {dropdown.sorting && (
+          <ul className="absolute left-0 bg-white border shadow-lg rounded-md py-2 mt-2 z-50 min-w-[200px]">
+            {[
+              { label: "Price: Low to High", sortOrder: "asc" as const },
+              { label: "Price: High to Low", sortOrder: "desc" as const },
+            ].map(({ label, sortOrder }) => (
+              <li
+                key={label}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleSort(sortOrder)}
+              >
+                {label}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
         </div>
       </div>
-      <br />
 
-      <div className="max-w-[1280px] mx-auto px-4 md:px-6 mb-[200px]">
-        {/* Product Grid */}
+      {/* Product Grid */}
+      <div className="max-w-[1280px] mx-auto px-4 md:px-6 mb-[200px] mt-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-[200px] gap-y-[200px]">
           {products.map((product: Product) => (
             <div key={product._id}>
               <ProductCardE
                 image={product.imageUrl}
                 proname={product.name}
-                proprice={product.price} slug={product.slug} category={product.category.name}              />
+                proprice={product.price}
+                slug={product.slug}
+                category={product.category.name}
+              />
             </div>
           ))}
         </div>
 
         {/* View Collection Button */}
         {!isShowingAllProducts && (
-          <div className="flex justify-center pb-4 md:pb-11 mt-4 sm:mt-2 md:mt-0 lg:mt-5">
+          <div className="flex justify-center pb-8 pt-10">
             <button
               onClick={handleViewCollection}
-              className="cursor-pointer bg-[#F9F9F9]/100 px-[32px] py-[16px] rounded-sm hover:bg-slate-600 hover:text-white text-mytext font-satoshi text-[16px] leading-[150%] w-[342px] sm:w-[170px] h-[56px]"
+              className="border-2 border-myblack text-myblack rounded-md py-2 px-6 hover:bg-myblack hover:text-white"
             >
-              View collection
+              View full collection
             </button>
           </div>
         )}

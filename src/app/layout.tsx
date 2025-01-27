@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Footer from "./components/footer";
 import Chatbot from "./components/chatbot";
-
+import { CartProvider } from "./components/context/CartContext";
 
 
 export const metadata: Metadata = {
@@ -17,11 +17,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      
       <body>
-        <Chatbot/>
-        {children}
-        <Footer/>
+      
+        
+          <Chatbot />
+           <CartProvider>{children}</CartProvider>
+          
+          <Footer />
+        
       </body>
     </html>
   );
