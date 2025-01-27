@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useCart } from "./context/CartContext";
 import Link from "next/link";
 
@@ -31,8 +31,8 @@ const CartActions = ({
     renovate: false,
   });
 
-  // Fetch stock from the backend
-  const fetchStock = async () => {
+  // Memoized fetchStock function to avoid warning
+  const fetchStock = useCallback(async () => {
     try {
       const response = await fetch(`http://localhost:3000/api/getStock?productId=${productId}`);
       if (response.ok) {
@@ -44,11 +44,11 @@ const CartActions = ({
     } catch (error) {
       console.error("Error fetching stock:", error);
     }
-  };
+  }, [productId]); // Only depend on productId
 
   useEffect(() => {
     fetchStock(); // Fetch stock on component mount
-  }, []);
+  }, [fetchStock]); // Add fetchStock to the dependency array
 
   // Handle checkbox changes
   const handleCheckboxChange = (option: "customize" | "renovate") => {
@@ -108,16 +108,16 @@ const CartActions = ({
       setMessage("No items in the cart.");
       return;
     }
-  
+
     // Show success message immediately after clicking "Add to Cart"
     setMessage(`${quantity} item(s) added to the cart successfully.`);
-    
+
     // Reset quantity and hide the message after 3 seconds
     setQuantity(0);
     setTimeout(() => {
       setMessage(null);
     }, 3000);
-  
+
     try {
       // Check if "Renovate" is selected
       if (!checkedOptions.renovate) {
@@ -132,16 +132,16 @@ const CartActions = ({
             quantityChange: -quantity,
           }),
         });
-  
+
         if (!response.ok) {
           setMessage("Failed to update stock. Please try again.");
           return;
         }
-  
+
         // Fetch the updated stock from the backend after successful update
         await fetchStock();
       }
-  
+
       // Update local cart
       addToCart({
         productId,
@@ -151,15 +151,13 @@ const CartActions = ({
         productImage,
         productDescription,
         stock,
-        isRenovate:true,
+        isRenovate: true,
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
       setMessage("An error occurred. Please try again.");
     }
   };
-  
-  
 
   const totalPrice = discountedPrice * quantity;
 
@@ -262,6 +260,8 @@ const CartActions = ({
 };
 
 export default CartActions;
+
+
 
 
 

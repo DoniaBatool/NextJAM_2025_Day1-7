@@ -33,7 +33,7 @@ const Chatbot = () => {
     setLoading(true);
 
     // Send the message to your API
-    const response = await fetch("/api/chat", {
+    const response = await fetch("http://localhost:3000/api/chatbot", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -8,7 +8,6 @@ import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import Banner from "./Banneridpage";
 import { FaHome } from "react-icons/fa";
 import { Product } from "@/sanity/lib/types";
-import { client } from "@/sanity/lib/client";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { searchProducts } from "@/sanity/lib/queries";
 

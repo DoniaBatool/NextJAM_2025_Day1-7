@@ -1,15 +1,15 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import Link from 'next/link'; // Import Link from Next.js
+import Link from 'next/link';
 import { RiArrowDropDownFill } from 'react-icons/ri';
 import { ProductCardE } from '../components/productCard';
 import Topbar from '../components/topbar';
 import { eightproducts, allproducts, allproductsByPrice, allproductsSortedBy } from '@/sanity/lib/queries';
 import { Product } from '@/sanity/lib/types';
 import { sanityFetch } from '@/sanity/lib/fetch';
-
 
 export default function Productspage() {
   const [products, setProducts] = useState<Product[]>([]); // Store fetched products
@@ -82,24 +82,25 @@ export default function Productspage() {
     }
   };
 
-  // Fetch products sorted by price
- // Handle Sort by Price
-const handleSort = async (sortOrder: "asc" | "desc") => {
-  try {
-    // Define GROQ query for sorting
-    const query = allproductsSortedBy; // use the existing `allproductsSortedBy` query from your queries file.
-    const sortedProducts: Product[] = await sanityFetch({
-      query,
-      params: { sortOrder }, // Pass sortOrder as parameter
-    });
+  // Handle Sort by Price
+  const handleSort = async (sortOrder: 'asc' | 'desc') => { // Ensure sortOrder is strictly 'asc' | 'desc'
+    try {
+      const sortedProducts: Product[] = await sanityFetch({
+        query: allproductsSortedBy,
+        params: { sortOrder }, // Pass sortOrder as parameter
+      });
 
-    // Update the state with the sorted products
-    setProducts(sortedProducts);
-    setDropdown((prev) => ({ ...prev, sorting: false })); // Close dropdown
-  } catch (error) {
-    console.error("Error fetching sorted products:", error);
-  }
-};
+      setProducts(sortedProducts);
+      setDropdown((prev) => ({ ...prev, sorting: false })); // Close dropdown
+    } catch (error) {
+      console.error('Error fetching sorted products:', error);
+    }
+  };
+
+  const sortOptions = [
+    { label: 'Price: Low to High', sortOrder: 'asc' } as const,  // Ensure the type is 'asc'
+    { label: 'Price: High to Low', sortOrder: 'desc'} as const,  // Ensure the type is 'desc'
+  ];
 
   // Categories and Tags Data
   const categories = ['Lamps', 'Beds', 'Sofas', 'Tables', 'Ceramics', 'Plantpots', 'Chairs'];
@@ -109,11 +110,7 @@ const handleSort = async (sortOrder: "asc" | "desc") => {
     { label: '100-500 Pounds', minPrice: 100, maxPrice: 500 },
     { label: '500-1000 Pounds', minPrice: 500, maxPrice: 1000 },
   ];
-  const sortOptions = [
-    { label: 'Lowest to Highest', sortOrder: 'asc' },
-    { label: 'Highest to Lowest', sortOrder: 'desc' },
-  ];
-
+  
   return (
     <div className="max-w-[1440px] mx-auto" ref={dropdownRef}>
       <Topbar />
@@ -191,29 +188,26 @@ const handleSort = async (sortOrder: "asc" | "desc") => {
 
           {/* Sorting Dropdown */}
           <div className="relative">
-        <button
-          onClick={() => toggleDropdown("sorting")}
-          className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center bg-gray-100 hover:bg-gray-200 rounded-md"
-        >
-          Sort <RiArrowDropDownFill />
-        </button>
-        {dropdown.sorting && (
-          <ul className="absolute left-0 bg-white border shadow-lg rounded-md py-2 mt-2 z-50 min-w-[200px]">
-            {[
-              { label: "Price: Low to High", sortOrder: "asc" as const },
-              { label: "Price: High to Low", sortOrder: "desc" as const },
-            ].map(({ label, sortOrder }) => (
-              <li
-                key={label}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleSort(sortOrder)}
-              >
-                {label}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+            <button
+              onClick={() => toggleDropdown('sorting')}
+              className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center bg-gray-100 hover:bg-gray-200 rounded-md"
+            >
+              Sort <RiArrowDropDownFill />
+            </button>
+            {dropdown.sorting && (
+              <ul className="absolute left-0 bg-white border shadow-lg rounded-md py-2 mt-2 z-50 min-w-[200px]">
+                {sortOptions.map(({ label, sortOrder }) => (
+                  <li
+                    key={label}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleSort(sortOrder)} // Pass correct sortOrder
+                  >
+                    {label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
 
@@ -238,7 +232,7 @@ const handleSort = async (sortOrder: "asc" | "desc") => {
           <div className="flex justify-center pb-8 pt-10">
             <button
               onClick={handleViewCollection}
-              className="border-2 border-myblack text-myblack rounded-md py-2 px-6 hover:bg-myblack hover:text-white"
+              className="border-2 border-myblack text-myblack rounded-md py-2 px-6 hover:bg-black hover:text-white"
             >
               View full collection
             </button>
@@ -248,3 +242,6 @@ const handleSort = async (sortOrder: "asc" | "desc") => {
     </div>
   );
 }
+
+
+

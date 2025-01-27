@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import Topbar from "@/app/components/topbar";
 import { sanityFetch } from "@/sanity/lib/fetch";
@@ -21,7 +21,8 @@ const FAQPage = () => {
       try {
         const data = await sanityFetch({ query: faqQuery });
         setFaqs(data);
-      } catch (error) {
+      } catch {
+        // Removed the unused `error` parameter
         setError("Failed to load FAQs. Please try again later.");
       } finally {
         setLoading(false);
