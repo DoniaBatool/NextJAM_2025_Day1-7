@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Footer from "./components/footer";
-import Chatbot from "./components/chatbot";
 import { CartProvider } from "./components/context/CartContext";
+import Mybot from "./components/myBot";
 
 
 export const metadata: Metadata = {
@@ -20,9 +20,9 @@ export default function RootLayout({
       <body>
       
         
-          <Chatbot />
+         
            <CartProvider>{children}</CartProvider>
-          
+           <Mybot/>
           <Footer />
         
       </body>
