@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-export default function ChatWidget() {
+export default function Mybot() {
   const [isOpen, setIsOpen] = useState(false);
    const [showPopup, setShowPopup] = useState(true); // State to control popup visibility
   
