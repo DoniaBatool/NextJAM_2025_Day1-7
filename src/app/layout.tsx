@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Footer from "./components/footer";
 import { CartProvider } from "./components/context/CartContext";
-import Mybot from "./components/Mybot";
+import Mybot from "./components/chatbot";
+
+
 
 
 
