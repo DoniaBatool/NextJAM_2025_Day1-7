@@ -6,7 +6,8 @@ import newsletter from './newsletter'
 import feedback from './feedback'
 import review from './review'
 import customer from './customer'
-import order from './order'
+import { order } from './order'
+
 
 
 

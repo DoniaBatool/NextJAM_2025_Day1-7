@@ -54,7 +54,7 @@ const CartActions = ({
 
   const handleCheckboxChange = (option: "customize" | "renovate" | "purchase") => {
     setCheckedOptions(() => {
-      let updatedOptions = {
+      const updatedOptions = {
         customize: false,
         renovate: false,
         purchase: false,
