@@ -137,7 +137,7 @@ export const ProductCard2 = ({ image, proname, proprice,category,slug}: ProductC
         alt="product image"
         width={630}
         height={375}
-        className="w-full h-full object-cover" // Ensures consistent image size
+        className="w-full h-full object-fill" // Ensures consistent image size
       />
       <h4 className="pt-[24px] font-clash text-mytext text-[20px] leading-[140%]">
         {proname}

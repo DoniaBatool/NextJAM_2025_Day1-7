@@ -145,7 +145,7 @@ const ReviewSection = ({ productId }: myProps) => {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 focus:outline-none"
+            className="px-6 py-2 bg-black hover:bg-slate-800 text-white rounded-md  disabled:bg-gray-400 focus:outline-none"
           >
             {isSubmitting ? "Submitting..." : "Submit Review"}
           </button>

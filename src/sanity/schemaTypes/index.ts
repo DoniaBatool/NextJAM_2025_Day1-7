@@ -5,11 +5,11 @@ import { faq } from './faq'
 import newsletter from './newsletter'
 import feedback from './feedback'
 import review from './review'
-import customerInfo from './customerInfo'
-import orders from './orders'
+import customer from './customer'
+import order from './order'
 
 
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [product, Category,faq,newsletter,feedback,review,orders,customerInfo],
+  types: [product, Category,faq,newsletter,feedback,review,customer,order],
 }

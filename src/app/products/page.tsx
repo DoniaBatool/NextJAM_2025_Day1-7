@@ -118,7 +118,8 @@ export default function Productspage() {
 
       {/* Filters and Sorting */}
       <div className="flex flex-wrap justify-between items-center px-4 sm:px-6 lg:px-8 gap-y-4 mt-8">
-        <div className="flex flex-wrap gap-4 sm:gap-[12px] font-satoshi text-mytext text-[14px] sm:text-[16px] leading-[150%]">
+        <div className="flex flex-wrap gap-4 sm:gap-[12px] font-satoshi text-mytext text-[14px] sm:text-[16px] 
+        leading-[150%]">
           {/* Category Dropdown */}
           <div className="relative">
             <button

@@ -59,7 +59,7 @@ const TagPage = async ({ params }: Props) => {
         </div>
 
         {/* Product cards container */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-nowrap mb-[200px] gap-y-[250px]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6  mb-[200px] gap-y-[250px]">
           {products.map((product) => (
             <div key={product._id}>
               <ProductCardT

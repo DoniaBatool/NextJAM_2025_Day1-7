@@ -15,7 +15,7 @@ export default async function Ceramics() {
       </div>
 
       {/* Product cards container */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-[200px]">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-[200px] gap-y-[200px]">
         {products.map((product) => (
           <div key={product._id}>
             <ProductCardE

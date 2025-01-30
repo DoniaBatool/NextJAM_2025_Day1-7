@@ -20,7 +20,7 @@ export default async function PopularProducts () {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pb-[150px]">
         {/* Product 1 (sofa image takes up full width on mobile and smaller screens, 2 columns on larger screens) */}
        {
-        <div className="col-span-2">
+        <div className="col-span-2 pb-[170px] ">
           <ProductCard2
               image={product.imageUrl}
               proname={product.name}
@@ -30,14 +30,19 @@ export default async function PopularProducts () {
       
       
         {
+          
           products.map ((product) => (
-              <div key={product._id}>
+              <div key={product._id} >
         <ProductCardE
               image={product.imageUrl}
               proname={product.name}
               proprice={product.price} slug={product.slug} category={product.category.name} /> 
               </div>
-      ))}
+
+      ))
+      
+      
+      }
 
         </div>
       
