@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useCallback } from "react";
+import { getStockAction, updateStockAction } from "@/app/Actions/cartActions";
 
 interface CartItem {
   productId: string;
@@ -36,38 +37,23 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [stocks, setStocks] = useState<Stock[]>([]);
 
   const fetchStock = useCallback(async (productId: string) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/getStock?productId=${productId}`
+    const stock = await getStockAction(productId);
+    setStocks((prevStocks) => {
+      const updatedStocks = prevStocks.map((stockItem) =>
+        stockItem.productId === productId ? { ...stockItem, stock } : stockItem
       );
-      if (response.ok) {
-        const data = await response.json();
-        setStocks((prevStocks) => {
-          const updatedStocks = prevStocks.map((stock) =>
-            stock.productId === productId ? { ...stock, stock: data.stock } : stock
-          );
-  
-          // If product stock is not in the array, add it
-          if (!updatedStocks.find((s) => s.productId === productId)) {
-            updatedStocks.push({ productId, stock: data.stock });
-          }
-  
-          return updatedStocks;
-        });
-      } else {
-        console.error("Failed to fetch stock");
+      if (!updatedStocks.find((s) => s.productId === productId)) {
+        updatedStocks.push({ productId, stock });
       }
-    } catch (error) {
-      console.error("Error fetching stock:", error);
-    }
+      return updatedStocks;
+    });
   }, []);
-  
+
   const addToCart = async (item: CartItem) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
         (cartItem) => cartItem.productId === item.productId && cartItem.serviceType === item.serviceType
       );
-
       if (existingItem) {
         return prevCart.map((cartItem) =>
           cartItem.productId === item.productId && cartItem.serviceType === item.serviceType
@@ -82,33 +68,18 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (!item.isRenovate) {
       setStocks((prevStocks) =>
         prevStocks.map((stock) =>
-          stock.productId === item.productId
-            ? { ...stock, stock: stock.stock - item.quantity }
-            : stock
+          stock.productId === item.productId ? { ...stock, stock: stock.stock - item.quantity } : stock
         )
       );
     }
 
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/updateStock`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: item.productId,
-          quantityChange: item.isRenovate ? 0 : -item.quantity,
-        }),
-      });
-
-      if (response.ok) {
-        await fetchStock(item.productId);
-      }
-    } catch (error) {
-      console.error("Error adding item to cart:", error);
-    }
+    await updateStockAction(item.productId, item.isRenovate ? 0 : -item.quantity);
+    await fetchStock(item.productId);
   };
+
   const updateQuantity = async (productId: string, serviceType: string, newQuantity: number) => {
-    const currentQuantity = cart.find((item) => item.productId === productId && item.serviceType === serviceType)?.quantity || 0;
-  
+    const currentQuantity =
+      cart.find((item) => item.productId === productId && item.serviceType === serviceType)?.quantity || 0;
     setCart((prevCart) =>
       prevCart.map((cartItem) =>
         cartItem.productId === productId && cartItem.serviceType === serviceType
@@ -116,64 +87,29 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           : cartItem
       )
     );
-  
-    // Calculate the quantity change (difference between new and old quantity)
+
     const quantityChange = newQuantity - currentQuantity;
-  
-    // Update stock in Sanity for "Purchase" and "Customize" services only
     if (serviceType !== "Renovate") {
-      try {
-        // When the quantity increases, stock decreases; when quantity decreases, stock increases
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/updateStock`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            productId,
-            quantityChange: -quantityChange,  // Negate the quantity change to reverse stock
-          }),
-        });
-  
-        if (response.ok) {
-          await fetchStock(productId);  // Re-fetch stock to update the stock data in your context
-        }
-      } catch (error) {
-        console.error("Error updating quantity in Sanity:", error);
-      }
+      await updateStockAction(productId, -quantityChange);
+      await fetchStock(productId);
     }
   };
-  
 
   const removeItem = async (productId: string, serviceType: string) => {
     const removedItem = cart.find((item) => item.productId === productId && item.serviceType === serviceType);
     if (removedItem) {
       setStocks((prevStocks) =>
         prevStocks.map((stock) =>
-          stock.productId === productId
-            ? { ...stock, stock: stock.stock + removedItem.quantity }
-            : stock
+          stock.productId === productId ? { ...stock, stock: stock.stock + removedItem.quantity } : stock
         )
       );
 
-      setCart((prevCart) => prevCart.filter(
-        (cartItem) => !(cartItem.productId === productId && cartItem.serviceType === serviceType)
-      ));
+      setCart((prevCart) =>
+        prevCart.filter((cartItem) => !(cartItem.productId === productId && cartItem.serviceType === serviceType))
+      );
 
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/updateStock`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            productId,
-            quantityChange: removedItem.quantity,
-          }),
-        });
-
-        if (response.ok) {
-          await fetchStock(productId);
-        }
-      } catch (error) {
-        console.error("Error removing item from cart:", error);
-      }
+      await updateStockAction(productId, removedItem.quantity);
+      await fetchStock(productId);
     }
   };
 

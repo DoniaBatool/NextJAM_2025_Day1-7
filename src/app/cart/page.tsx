@@ -6,6 +6,8 @@ import Image from "next/image";
 import { FaTrashAlt } from "react-icons/fa";
 import { useCallback, useEffect, useState } from "react";
 import { client } from "@/sanity/lib/client";
+import { getStockAction } from "../Actions/cartActions";
+
 
 const Cartpage = () => {
   const { cart, updateQuantity, removeItem } = useCart();
@@ -13,15 +15,8 @@ const Cartpage = () => {
 
   const fetchStock = useCallback(async (productId: string) => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/getStock?productId=${productId}`,{ cache: "no-store" }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setStockInfo((prev) => ({ ...prev, [productId]: data.stock }));
-      } else {
-        console.error("Failed to fetch stock");
-      }
+      const stock = await getStockAction(productId);
+      setStockInfo((prev) => ({ ...prev, [productId]: stock }));
     } catch (error) {
       console.error("Error fetching stock:", error);
     }

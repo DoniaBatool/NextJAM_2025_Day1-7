@@ -1,5 +1,3 @@
-
-
 import { client } from "@/sanity/lib/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,8 +7,8 @@ export async function POST(req: NextRequest) {
   try {
     const { productId, quantityChange } = await req.json();
 
-    if (!productId || quantityChange === undefined) {
-      return NextResponse.json({ error: "Product ID and quantity change are required" }, { status: 400 });
+    if (!productId || typeof quantityChange !== "number") {
+      return NextResponse.json({ error: "Product ID and valid quantity change are required" }, { status: 400 });
     }
 
     console.log("Fetching product:", productId);
@@ -22,8 +20,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    if (product.quantity === undefined || typeof product.quantity !== "number") {
-      return NextResponse.json({ error: "Product quantity is not properly defined in the database" }, { status: 500 });
+    if (typeof product.quantity !== "number") {
+      return NextResponse.json({ error: "Invalid product quantity in database" }, { status: 500 });
     }
 
     console.log(`Current stock: ${product.quantity}, Change requested: ${quantityChange}`);
@@ -45,17 +43,10 @@ export async function POST(req: NextRequest) {
 
     console.log("Stock updated successfully:", updatedProduct);
 
-    return NextResponse.json({ message: "Stock updated successfully", updatedProduct }, { status: 200 });
+    return NextResponse.json({ message: "Stock updated successfully", newStock }, { status: 200 });
   } catch (error: unknown) {
     console.error("Error updating stock:", error);
 
-    if (error instanceof Error) {
-      return NextResponse.json({ error: "Internal server error", details: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error", details: error instanceof Error ? error.message : "" }, { status: 500 });
   }
 }
-
-
-
