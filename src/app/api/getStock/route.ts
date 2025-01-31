@@ -1,8 +1,10 @@
 
-export const dynamic = "force-dynamic";
+
 
 import { client } from "@/sanity/lib/client";
 import { NextRequest, NextResponse } from "next/server";
+
+export const fetchCache = "force-no-store";
 
 export async function GET(req: NextRequest) {
   try {

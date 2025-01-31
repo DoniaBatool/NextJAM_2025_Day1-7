@@ -35,7 +35,7 @@ const CartActions = ({
   const fetchStock = useCallback(async () => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/getStock?productId=${productId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/getStock?productId=${productId}`,  { cache: "no-store" }
       );
       if (response.ok) {
         const data = await response.json();
@@ -76,7 +76,15 @@ const CartActions = ({
     });
   };
   
-  
+  const { stocks } = useCart();
+
+useEffect(() => {
+  const updatedStock = stocks.find((s) => s.productId === productId)?.stock;
+  if (updatedStock !== undefined) {
+    setStock(updatedStock);
+  }
+}, [stocks, productId]);
+
 
   const increment = () => {
     if (quantity < stock) {
@@ -117,18 +125,20 @@ const CartActions = ({
         productDescription,
         stock,
         isRenovate: checkedOptions.renovate,
-        serviceType: selectedService, // Ensure the selected service is stored per item
+        serviceType: selectedService,
       });
   
       alert("Item successfully added to cart!");
-      setQuantity(0); // Reset quantity after adding to cart
+      setQuantity(0);
   
-      await fetchStock(); // Re-fetch stock from Sanity
+      // Wait for the stock to update in Sanity
+      await new Promise((resolve) => setTimeout(resolve, 500)); // Short delay for API to update
+  
+      await fetchStock(); // Fetch new stock from API
     } else {
       setMessage("Please select at least one item.");
     }
   };
-  
   
 
   return (

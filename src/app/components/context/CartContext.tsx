@@ -42,11 +42,18 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       );
       if (response.ok) {
         const data = await response.json();
-        setStocks((prevStocks) =>
-          prevStocks.map((stock) =>
+        setStocks((prevStocks) => {
+          const updatedStocks = prevStocks.map((stock) =>
             stock.productId === productId ? { ...stock, stock: data.stock } : stock
-          )
-        );
+          );
+  
+          // If product stock is not in the array, add it
+          if (!updatedStocks.find((s) => s.productId === productId)) {
+            updatedStocks.push({ productId, stock: data.stock });
+          }
+  
+          return updatedStocks;
+        });
       } else {
         console.error("Failed to fetch stock");
       }
@@ -54,7 +61,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Error fetching stock:", error);
     }
   }, []);
-
+  
   const addToCart = async (item: CartItem) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(

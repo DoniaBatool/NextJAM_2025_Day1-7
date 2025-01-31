@@ -14,7 +14,7 @@ const Cartpage = () => {
   const fetchStock = useCallback(async (productId: string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/getStock?productId=${productId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/getStock?productId=${productId}`,{ cache: "no-store" }
       );
       if (response.ok) {
         const data = await response.json();
