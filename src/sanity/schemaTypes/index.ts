@@ -12,5 +12,5 @@ import { order } from './order'
 
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [product, Category,faq,newsletter,feedback,review,customer,order],
+  types: [product, Category,faq,newsletter,feedback,review,order,customer],
 }

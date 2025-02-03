@@ -8,6 +8,7 @@ export async function getStockAction(productId: string): Promise<number> {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/getStock?productId=${productId}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
+      cache: "no-store", 
     });
 
     if (!res.ok) {
@@ -28,7 +29,9 @@ export async function updateStockAction(productId: string, quantityChange: numbe
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/updateStock`, {
       method: "POST",
+      cache: "no-store", 
       headers: { "Content-Type": "application/json" },
+      
       body: JSON.stringify({ productId, quantityChange }),
     });
 

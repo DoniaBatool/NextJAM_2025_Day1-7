@@ -16,6 +16,11 @@ export const token= assertValue(
   'Missing environment variable: NEXT_PUBLIC_SANITY_API_TOKEN'
 )
 
+export const gemini= assertValue(
+  process.env.NEXT_PUBLIC_GEMINI_API_KEY,
+  'Missing environment variable: NEXT_PUBLIC_GEMINI_API_KEY'
+)
+
 export const apiurl= assertValue(
   process.env.NEXT_PUBLIC_API_URL,
   'Missing environment variable: NEXT_PUBLIC_API_URL'

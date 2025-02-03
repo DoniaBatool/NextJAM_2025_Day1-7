@@ -1,9 +1,14 @@
 "use client";
-import { generateAIComment } from "@/api/huggingFace/route";
+import { generateAIComment } from "@/api/geminiAPI/route";
+import { useAuth } from "@/context/AuthContext";
 import { client } from "@/sanity/lib/client";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const FeedbackPage = () => {
+const { user } = useAuth();
+const router = useRouter();
+
   const [rating, setRating] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -26,6 +31,14 @@ const FeedbackPage = () => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
+    }
+  };
+
+  const handleCart = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!user) {
+      e.preventDefault(); // ✅ Stop Link navigation
+      alert("You must be logged in to access the cart.");
+      router.push("/auth"); // ✅ Redirect to login page
     }
   };
 
@@ -71,6 +84,7 @@ const FeedbackPage = () => {
   
     if (!validateForm()) return;
   
+   
     setIsLoading(true);
   
     try {
@@ -282,7 +296,8 @@ const FeedbackPage = () => {
       {/* Submit Button */}
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+        className="w-full bg-black text-white py-2 rounded-lg hover:bg-slate-800 transition"
+       onClick={handleCart}
       >
         Submit Feedback
       </button>

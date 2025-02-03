@@ -1,14 +1,18 @@
 'use client';
 import { useState } from 'react';
 import { IoIosSearch } from 'react-icons/io';
-import { RxAvatar } from 'react-icons/rx';
-import { IoCartOutline } from 'react-icons/io5';
 import { HiOutlineMenu, HiOutlineX } from 'react-icons/hi';
 import Link from 'next/link';
 import Divider from './divider';
 import { sanityFetch } from '@/sanity/lib/fetch';
 import { searchProducts } from '@/sanity/lib/queries';
 import { Product } from '@/sanity/lib/types';
+import Avatar from './Avatar';
+import { AuthProvider } from '@/context/AuthContext';
+import Toast from './Toast';
+
+
+
 
 const Topbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -105,10 +109,11 @@ const Topbar = () => {
 
         {/* Right Section (Cart & Avatar) - Shown on screens >= 768px */}
         <div className="hidden md:flex gap-5 items-center">
-          <Link href="/cart">
-            <IoCartOutline size={20} color="#2A254B" className="cursor-pointer" />
-          </Link>
-          <RxAvatar size={20} color="#2A254B" className="cursor-pointer" />
+              
+         <AuthProvider>
+         <Toast/>
+          <Avatar/>
+         </AuthProvider>
         </div>
       </div>
 
@@ -145,15 +150,14 @@ const Topbar = () => {
             <Link href="/products/Lamps"><li onClick={() => setMenuOpen(false)}>Lamps</li></Link>
             <Link href="/products/Beds"><li onClick={() => setMenuOpen(false)}>Beds</li></Link>
             <Link href="/products"><li onClick={() => setMenuOpen(false)}>All Products</li></Link>
-            <Link href="/cart">
-            <li onClick={() => setMenuOpen(false)}><IoCartOutline size={20} color="#2A254B" className="cursor-pointer" />
-            </li>
-          </Link>
-          <Link href="/cart">
+            <AuthProvider>
             <li onClick={() => setMenuOpen(false)}>
-            <RxAvatar size={20} color="#2A254B" className="cursor-pointer" />
+            <Toast/>
             </li>
-          </Link>
+            <li onClick={() => setMenuOpen(false)}>
+            <Avatar/>
+                </li>
+            </AuthProvider>
           </ul>
         </nav>
       )}

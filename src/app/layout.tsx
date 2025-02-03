@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Footer from "./components/footer";
-import { CartProvider } from "./components/context/CartContext";
 import Mybot from "./components/chatbot";
+import { CartProvider } from "@/context/CartContext";
 
 
 
@@ -25,8 +25,11 @@ export default function RootLayout({
       <body>
       
         
-         
-           <CartProvider>{children}</CartProvider>
+        <CartProvider>
+        {children}
+        </CartProvider>
+          
+      
            <Mybot/>
           <Footer />
         

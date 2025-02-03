@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { RiArrowDropDownFill } from 'react-icons/ri';
 import { ProductCardE } from '../components/productCard';
 import Topbar from '../components/topbar';
-import { eightproducts, allproducts, allproductsByPrice, allproductsSortedBy } from '@/sanity/lib/queries';
+import { eightproducts, allproducts, allproductsByPrice} from '@/sanity/lib/queries';
 import { Product } from '@/sanity/lib/types';
 import { sanityFetch } from '@/sanity/lib/fetch';
 
@@ -82,26 +82,7 @@ export default function Productspage() {
     }
   };
 
-  // Handle Sort by Price
-  const handleSort = async (sortOrder: 'asc' | 'desc') => { // Ensure sortOrder is strictly 'asc' | 'desc'
-    try {
-      const sortedProducts: Product[] = await sanityFetch({
-        query: allproductsSortedBy,
-        params: { sortOrder }, // Pass sortOrder as parameter
-      });
-
-      setProducts(sortedProducts);
-      setDropdown((prev) => ({ ...prev, sorting: false })); // Close dropdown
-    } catch (error) {
-      console.error('Error fetching sorted products:', error);
-    }
-  };
-
-  const sortOptions = [
-    { label: 'Price: Low to High', sortOrder: 'asc' } as const,  // Ensure the type is 'asc'
-    { label: 'Price: High to Low', sortOrder: 'desc'} as const,  // Ensure the type is 'desc'
-  ];
-
+  
   // Categories and Tags Data
   const categories = ['Lamps', 'Beds', 'Sofas', 'Tables', 'Ceramics', 'Plantpots', 'Chairs'];
   const tags = ['Luxury', 'New Arrival', 'Antique', 'Modern', 'Decor', 'Popular Products', 'Comfy'];
@@ -187,28 +168,7 @@ export default function Productspage() {
             )}
           </div>
 
-          {/* Sorting Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => toggleDropdown('sorting')}
-              className="flex items-center px-[16px] sm:px-[24px] py-[10px] sm:py-[12px] gap-1 text-center bg-gray-100 hover:bg-gray-200 rounded-md"
-            >
-              Sort <RiArrowDropDownFill />
-            </button>
-            {dropdown.sorting && (
-              <ul className="absolute left-0 bg-white border shadow-lg rounded-md py-2 mt-2 z-50 min-w-[200px]">
-                {sortOptions.map(({ label, sortOrder }) => (
-                  <li
-                    key={label}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSort(sortOrder)} // Pass correct sortOrder
-                  >
-                    {label}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+        
         </div>
       </div>
 

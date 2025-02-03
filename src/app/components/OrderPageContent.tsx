@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { client } from "@/sanity/lib/client";
+import { useCart } from "@/context/CartContext";
 
 interface CustomerInfo {
   fullName: string;
@@ -28,8 +29,9 @@ interface Order {
 const OrderPageContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { clearCart } = useCart();
   const orderId = searchParams.get("orderId");
-
+  
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     fullName: "",
     email: "",
@@ -85,6 +87,9 @@ const OrderPageContent = () => {
         .commit();
 
       alert("Order confirmed!");
+
+      // ✅ Clear the cart after order confirmation
+      clearCart();
 
       setTimeout(() => {
         router.push(`/orderSuccess?orderId=${order._id}`);

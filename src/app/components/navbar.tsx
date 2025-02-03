@@ -2,14 +2,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { IoIosSearch } from "react-icons/io";
-import { IoCartOutline } from "react-icons/io5";
-import { RxAvatar } from "react-icons/rx";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import Banner from "./Banneridpage";
 import { FaHome } from "react-icons/fa";
 import { Product } from "@/sanity/lib/types";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { searchProducts } from "@/sanity/lib/queries";
+import { AuthProvider } from "@/context/AuthContext";
+import Avatar from "./Avatar";
+import Toast from "./Toast";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,11 +54,12 @@ const Navbar = () => {
 
           {/* Right: Icons (Stay on right side at ≤640px) */}
           <div className="flex items-center gap-5">
-            <Link href="/cart">
-              <IoCartOutline size={20} color="#2A254B" className="cursor-pointer" />
-            </Link>
-            <RxAvatar size={20} color="#2A254B" className="cursor-pointer" />
-
+         
+            <AuthProvider>
+            <Toast/>
+            <Avatar/>
+            </AuthProvider>
+          
             {/* Hamburger Menu */}
             <button
               className="md:hidden flex items-center p-2 rounded-md focus:outline-none"
@@ -154,6 +156,7 @@ const Navbar = () => {
             <Link href="/products" onClick={() => setMenuOpen(false)}>
               <li className="text-base font-satoshi text-mytext">All Products</li>
             </Link>
+          
           </ul>
         </nav>
       )}

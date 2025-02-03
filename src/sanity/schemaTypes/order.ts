@@ -46,7 +46,13 @@ export const order= {
         title: "Tracking Number",
         type: "string",
         description: "Tracking number for the order",  // Optional description
-      }
+      },
+      {
+        name: 'carrier',
+        title: 'Carrier',
+        type: 'string', // or 'text' if you expect a longer value
+        description: 'The carrier handling the shipment (e.g., Shippo)',
+      },
     ]
   };
   

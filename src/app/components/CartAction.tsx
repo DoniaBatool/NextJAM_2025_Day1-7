@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useCart } from "./context/CartContext";
 import Link from "next/link";
+import { getStockAction } from "../Actions/cartActions";
+import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface CartActionsProps {
   productId: string;
@@ -21,6 +24,9 @@ const CartActions = ({
   productImage,
   productDescription,
 }: CartActionsProps) => {
+  const { user } = useAuth();
+  const router = useRouter();
+
   const { addToCart } = useCart();
   const [stock, setStock] = useState(initialStock);
   const [quantity, setQuantity] = useState(0);
@@ -34,15 +40,8 @@ const CartActions = ({
 
   const fetchStock = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/getStock?productId=${productId}`,  { cache: "no-store" }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setStock(data.stock);
-      } else {
-        console.error("Failed to fetch stock");
-      }
+      const stockData = await getStockAction(productId);
+      setStock(stockData);
     } catch (error) {
       console.error("Error fetching stock:", error);
     }
@@ -52,6 +51,13 @@ const CartActions = ({
     fetchStock();
   }, [fetchStock]);
 
+  const handleCart = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!user) {
+      e.preventDefault(); // ✅ Stop Link navigation
+      alert("You must be logged in to access the cart!");
+      router.push("/auth"); // ✅ Redirect to login page
+    }
+  };
   const handleCheckboxChange = (option: "customize" | "renovate" | "purchase") => {
     setCheckedOptions(() => {
       const updatedOptions = {
@@ -234,7 +240,7 @@ useEffect(() => {
         </button>
 
         <Link href="/cart">
-          <button className="flex-1 py-2 px-4 text-nowrap bg-blue-950 text-white rounded-md transition">
+          <button onClick={handleCart} className="flex-1 py-2 px-4 text-nowrap bg-blue-950 text-white rounded-md transition">
             Go to Cart
           </button>
         </Link>

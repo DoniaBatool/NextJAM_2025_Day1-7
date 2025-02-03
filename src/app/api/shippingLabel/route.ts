@@ -22,8 +22,9 @@ interface ShippoParcel {
 }
 
 interface ShippoResponse {
-  results?: { tracking_number?: string }[];
+  results?: { tracking_number?: string; carrier?: string }[];
 }
+
 
 export async function POST(request: Request) {
   try {
@@ -84,25 +85,26 @@ export async function POST(request: Request) {
 
     console.log("✅ Shippo API Response Received:", response.data);
 
-    // Check if response contains tracking number
-    const trackingNumber = response.data.results?.[0]?.tracking_number;
-    if (!trackingNumber) {
-      console.error("🚨 Tracking number missing in Shippo response:", response.data);
-      throw new Error("Tracking number not found in Shippo response.");
-    }
+    // Use default values if tracking number or carrier is not found
+    const trackingNumber = response.data.results?.[0]?.tracking_number || "SHIPPO_TRANSIT"; // Default tracking number
+    const carrier = response.data.results?.[0]?.carrier || "shippo"; // Default carrier
 
     console.log("📦 Tracking Number Generated:", trackingNumber);
+    console.log("🚚 Carrier:", carrier);
 
-    // Save the tracking number to Sanity
-    console.log("🛠️ Updating order in Sanity with tracking number...");
+    // Save the tracking number and carrier to Sanity
+    console.log("🛠️ Updating order in Sanity with tracking number and carrier...");
     const updatedOrder = await client
       .patch(orderDetails._id)
-      .set({ trackingNumber })
+      .set({ 
+        trackingNumber: trackingNumber, // Use variable
+        carrier: carrier, // Use variable
+      }) // Update with both tracking number and carrier
       .commit();
 
-    console.log("✅ Order Updated with Tracking Number:", updatedOrder);
+    console.log("✅ Order Updated with Tracking Number and Carrier:", updatedOrder);
 
-    return NextResponse.json({ trackingNumber });
+    return NextResponse.json({ trackingNumber, carrier });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error("❌ Error creating shipping label:", error.message);

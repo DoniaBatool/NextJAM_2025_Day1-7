@@ -5,7 +5,7 @@ const Feature = () => {
     <section className="max-w-[1280px] mx-auto flex flex-col justify-center mt-[40px] mb-[130px] px-5">
       {/* Heading */}
       <div className="mb-[60px]">
-        <h3 className="text-[24px] text-left md:text-center font-clash leading-[140%] text-[#2A254B]">
+        <h3 className="text-[40px] md:text-[30px] text-left md:text-center font-clash leading-[140%] text-[#2A254B]">
           What makes our brand different
         </h3>
       </div>

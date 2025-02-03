@@ -1,4 +1,5 @@
 "use client";
+import { useAuth } from "@/context/AuthContext";
 import { client } from "@/sanity/lib/client";
 import { useState, useEffect, useRef } from "react";
 
@@ -19,7 +20,7 @@ const ReviewSection = ({ productId }: myProps) => {
   const [reviewerName, setReviewerName] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>("");
-
+  const { user } = useAuth();
   const isMounted = useRef(true);
 
   useEffect(() => {
@@ -44,11 +45,16 @@ const ReviewSection = ({ productId }: myProps) => {
   }, [productId]);
 
   const handleSubmit = async () => {
-    if (!rating || !reviewText || !reviewerName) {
+
+    if (!rating || !reviewText || !reviewerName  ) {
       alert("Please fill out all fields.");
       return;
     }
-
+     
+    if (!user) {
+      alert("You must be logged in to submit a review.");
+      return;
+    }
     setIsSubmitting(true);
 
     const newReview: Review = {
@@ -73,12 +79,14 @@ const ReviewSection = ({ productId }: myProps) => {
 
         // Show success message for 10 seconds
         setSuccessMessage("Your review has been submitted successfully!");
-        setTimeout(() => setSuccessMessage(""), 10000);
-
-        // Reset the form fields
-        setRating(0);
-        setReviewText("");
-        setReviewerName("");
+        setTimeout(() => {
+          if (isMounted.current) {
+            setRating(0);
+            setReviewText("");
+            setReviewerName("");
+            setSuccessMessage(""); // Remove success message after 5 sec
+          }
+        }, 3000);
       }
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -89,7 +97,7 @@ const ReviewSection = ({ productId }: myProps) => {
       }
     }
   };
-
+ 
   return (
     <div className="bg-white max-w-3xl p-6 rounded-lg mt-10">
       <h3 className="text-2xl font-semibold text-gray-800 mb-6">

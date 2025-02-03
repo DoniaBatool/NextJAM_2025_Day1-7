@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { client } from "@/sanity/lib/client";
 import { QRCodeCanvas } from "qrcode.react";
-import axios from "axios";
 
 // Define TypeScript Interfaces
 interface CustomerInfo {
@@ -30,22 +29,14 @@ interface OrderDetails {
   cartItems: CartItem[];
   customerInfo: CustomerInfo;
   trackingNumber?: string;
-}
-
-interface TrackingInfo {
-  trackingNumber: string;
-  carrier?: string;
-  status?: string;
-  eta?: string;
+  carrier?:string;
 }
 
 const OrderSuccessContent = () => {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
-  const [trackingInfo, setTrackingInfo] = useState<TrackingInfo | null>(null);
-  const [isTracking, setIsTracking] = useState(false);
-  const [isShippingLabelCreating, setIsShippingLabelCreating] = useState(false);
+  const [expectedDelivery, setExpectedDelivery] = useState<string | null>(null); // State for expected delivery date
 
   useEffect(() => {
     if (orderId) {
@@ -63,11 +54,26 @@ const OrderSuccessContent = () => {
                 deliveryAddress,
                 contactNumber
               },
-              trackingNumber
+              trackingNumber,
+              carrier,
             }`,
             { orderId }
           );
           setOrderDetails(order);
+
+          // Calculate expected delivery date (3-5 days from order date)
+          if (order.orderDate) {
+            const orderDate = new Date(order.orderDate);
+            const minDays = 3;
+            const maxDays = 5;
+            const deliveryMinDate = new Date(orderDate);
+            const deliveryMaxDate = new Date(orderDate);
+            deliveryMinDate.setDate(orderDate.getDate() + minDays);
+            deliveryMaxDate.setDate(orderDate.getDate() + maxDays);
+
+            const expectedDeliveryText = `${deliveryMinDate.toLocaleDateString()} - ${deliveryMaxDate.toLocaleDateString()}`;
+            setExpectedDelivery(expectedDeliveryText);
+          }
         } catch (error) {
           console.error("Error fetching order details:", error);
         }
@@ -75,74 +81,6 @@ const OrderSuccessContent = () => {
       fetchOrderDetails();
     }
   }, [orderId]);
-
-  // Track order using Shippo API
-  const trackOrder = async () => {
-    if (!orderDetails?.trackingNumber) {
-      alert("No tracking number available.");
-      return;
-    }
-
-    setIsTracking(true);
-    try {
-      const response = await axios.post<TrackingInfo>(
-        "https://api.goshippo.com/trackings/",
-        {
-          tracking_number: orderDetails.trackingNumber,
-        },
-        {
-          headers: {
-            Authorization: `ShippoToken ${process.env.NEXT_PUBLIC_SHIPPO_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      setTrackingInfo(response.data);
-    } catch (error) {
-      console.error("Error tracking order:", error);
-      alert("Failed to track the order. Please try again.");
-    } finally {
-      setIsTracking(false);
-    }
-  };
-
-  // Create Shipping Label and Get Tracking Number
-  const createShippingLabel = async () => {
-    if (!orderDetails) {
-      alert("Order details are missing.");
-      return;
-    }
-
-    setIsShippingLabelCreating(true);
-    try {
-      const response = await axios.post<{ trackingNumber: string; carrier?: string; status?: string; eta?: string }>(
-        `${process.env.NEXT_PUBLIC_API_URL}/shippingLabel`,
-        { ...orderDetails, _id: orderDetails._id }
-      );
-
-      if (response.data.trackingNumber) {
-        await client
-          .patch(orderDetails._id)
-          .set({ trackingNumber: response.data.trackingNumber })
-          .commit();
-
-        setTrackingInfo({
-          trackingNumber: response.data.trackingNumber,
-          carrier: response.data.carrier,
-          status: response.data.status,
-          eta: response.data.eta,
-        });
-      } else {
-        alert("Failed to create shipping label.");
-      }
-    } catch (error) {
-      console.error("Error creating shipping label:", error);
-      alert("Error creating shipping label.");
-    } finally {
-      setIsShippingLabelCreating(false);
-    }
-  };
 
   if (!orderDetails) {
     return (
@@ -163,6 +101,8 @@ const OrderSuccessContent = () => {
           <h2 className="text-xl font-semibold text-gray-700">Order Summary</h2>
           <p className="text-gray-600"><strong>Order ID:</strong> {orderDetails.orderId}</p>
           <p className="text-gray-600"><strong>Date:</strong> {orderDetails.orderDate}</p>
+          <p className="text-gray-600"><strong>Tracking ID:</strong> {orderDetails.trackingNumber}</p>
+          <p className="text-gray-600"><strong>Carrier:</strong> {orderDetails.carrier}</p>
         </div>
 
         <div className="border-b pb-4 mb-4">
@@ -194,31 +134,14 @@ const OrderSuccessContent = () => {
           )}
         </p>
 
-        <div className="flex mt-6 gap-7 justify-center flex-wrap">
-          <button
-            onClick={trackOrder}
-            className="bg-mytext text-white px-8 py-4 rounded-md text-[16px]"
-            disabled={isTracking}
-          >
-            {isTracking ? "Tracking..." : "Track Your Order"}
-          </button>
-
-          <button
-            onClick={createShippingLabel}
-            className="bg-mytext text-white px-8 py-4 rounded-md text-[16px]"
-            disabled={isShippingLabelCreating}
-          >
-            {isShippingLabelCreating ? "Creating Shipping Label..." : "Create Shipping Label"}
-          </button>
-        </div>
-
-        {trackingInfo && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-700">Tracking Information</h3>
-            <pre className="bg-gray-100 p-4 rounded-md">{JSON.stringify(trackingInfo, null, 2)}</pre>
+        {expectedDelivery && (
+          <div className="mt-4">
+            <p className="text-lg font-semibold text-gray-700">Expected Delivery:</p>
+            <p className="text-gray-600">{expectedDelivery}</p>
           </div>
         )}
 
+        {/* Display QR Code */}
         <div className="mt-6 flex flex-col items-center">
           <h3 className="text-lg font-semibold text-gray-700">Scan to View Order</h3>
           <QRCodeCanvas value={JSON.stringify(orderDetails)} size={180} />

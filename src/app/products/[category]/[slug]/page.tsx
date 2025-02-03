@@ -5,6 +5,7 @@ import Club from "@/app/components/club";
 import Feature from "@/app/components/feature";
 import Navbar from "@/app/components/navbar";
 import ReviewSection from "@/app/components/Review";
+import { AuthProvider } from "@/context/AuthContext";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { Product } from "@/sanity/lib/types";
 import Image from "next/image";
@@ -133,14 +134,15 @@ const ProductDetailPage = async ({ params }: Props) => {
             </div>
 
            {/* Cart Actions */}
+           <AuthProvider>
            <CartActions
               productId={product._id}
               productName={product.name}
               productPrice={product.price}
               initialStock={product.quantity}
               productImage={product.imageUrl}
-              productDescription={product.description} 
-                         />
+              productDescription={product.description}  />
+            </AuthProvider>
           </div>
          
         </div>
@@ -149,8 +151,9 @@ const ProductDetailPage = async ({ params }: Props) => {
       
       <div className="max-w-[1280px] mx-auto px-4 md:px-6 ">
         <div className="mt-[50px] mb-[20px]">
-        <ReviewSection productId={product._id} />
-          <p className="text-[32px] text-mytext font-clash  text-left lg:text-left sm:text-center">You might also like</p>
+       <AuthProvider><ReviewSection productId={product._id} /></AuthProvider> 
+          <p className="text-[32px] text-mytext font-clash  text-left
+           lg:text-left sm:text-center">You might also like</p>
         </div>
       </div>
 

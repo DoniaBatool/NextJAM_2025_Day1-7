@@ -30,7 +30,7 @@ const ProductCardT = ({ image, proname, proprice,category,slug}: ProductCardProp
         alt="product image"
         width={305}
         height={480}
-        className="w-full h-full " // Ensures consistent image size
+        className="w-full h-full object-center" // Ensures consistent image size
       />
       <h4 className="pt-[24px] font-clash text-mytext text-[20px] leading-[140%]">
         {proname}
@@ -57,7 +57,7 @@ export const ProductCardSort = ({ image, proname, proprice,category,slug}: Produ
         alt="product image"
         width={305}
         height={480}
-        className="w-full h-full " // Ensures consistent image size
+        className="w-full h-full object-center" // Ensures consistent image size
       />
       <h4 className="pt-[24px] font-clash text-mytext text-[20px] leading-[140%]">
         {proname}
@@ -83,7 +83,7 @@ export const ProductCardE = ({ image, proname, proprice, category, slug }: Produ
           alt="product image"
           width={305}
           height={480}
-          className="w-full h-full "
+          className="w-full h-full object-center "
         />
         <h4 className="pt-[24px] font-clash text-mytext text-[20px] leading-[140%]">
           {proname}
@@ -109,7 +109,7 @@ export const ProductCardS = ({ image, proname, proprice, category,slug}: Product
           alt="product image"
           width={305}
           height={480}
-          className="w-full h-full "
+          className="w-full h-full object-center "
         />
         <h4 className="pt-[24px] font-clash text-mytext text-[20px] leading-[140%]">
           {proname}
