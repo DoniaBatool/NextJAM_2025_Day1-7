@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output:"standalone",
+  reactStrictMode: true,
     images: {
       remotePatterns: [
         { 
@@ -11,6 +13,10 @@ const nextConfig = {
           hostname: "lh3.googleusercontent.com",
         },
       ],
+    },
+    experimental:{
+    
+      forceSwcTransforms:true
     },
   };
   
