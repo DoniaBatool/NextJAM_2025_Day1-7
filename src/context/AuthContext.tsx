@@ -76,10 +76,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Sign in with Google OAuth
   const signInWithGoogle = async () => {
+    const redirectUrl = process.env.NEXT_PUBLIC_AUTH_API_URL; 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "http://localhost:3000", // Ensure this is correct
+        redirectTo: redirectUrl, // Ensure this is correct
       },
     });
 
