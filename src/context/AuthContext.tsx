@@ -64,11 +64,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Sign up with email and password
   const signUpWithEmail = async (email: string, password: string): Promise<AuthError | null> => {
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: typeof window !== 'undefined' 
+          ? `${window.location.origin}/auth/callback`
+          : undefined,
+      }
+    });
 
     if (error) {
       console.error("Signup Error:", error.message);
       return error;
+    }
+
+    // If email confirmation is disabled, user is automatically logged in
+    if (data.user && !data.session) {
+      // Email confirmation required
+      return null;
+    } else if (data.user && data.session) {
+      // Auto-logged in (email confirmation disabled)
+      setUser(data.user);
     }
 
     return null;
@@ -76,16 +93,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Sign in with Google OAuth
   const signInWithGoogle = async () => {
-    const redirectUrl = process.env.NEXT_PUBLIC_AUTH_API_URL; 
+    // Use current origin for redirect URL
+    const redirectUrl = typeof window !== 'undefined' 
+      ? `${window.location.origin}/auth/callback`
+      : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000/auth/callback';
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: redirectUrl, // Ensure this is correct
+        redirectTo: redirectUrl,
       },
     });
 
     if (error) {
       console.error("Error with Google sign-in:", error.message);
+      throw error;
     }
   };
 
