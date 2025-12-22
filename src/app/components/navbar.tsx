@@ -91,16 +91,18 @@ const Navbar = () => {
             {searchTerm && !loading && searchResults.length > 0 && (
               <div className="absolute left-0 right-0 top-11 bg-white shadow-lg mt-2 max-h-60 overflow-y-auto z-50">
                 <ul>
-                  {searchResults.map((product) => (
-                    <li
-                      key={product._id}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      <Link href={`/products/${product.category.name}`}>
-                        {product.name}
-                      </Link>
-                    </li>
-                  ))}
+                  {searchResults
+                    .filter((product) => product.category && product.category.name)
+                    .map((product) => (
+                      <li
+                        key={product._id}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        <Link href={`/products/${product.category!.name}`}>
+                          {product.name}
+                        </Link>
+                      </li>
+                    ))}
                 </ul>
               </div>
             )}

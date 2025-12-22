@@ -34,17 +34,19 @@ const ProductCategory = async ({ category, currentProductId }: ProductCategoryPr
     <div className="max-w-[1280px] mb-[200px] text-nowrap mx-auto px-4 
       gap-x-4 sm:gap-x-10 gap-y-[250px]  md:gap-x-4 md:gap-y-[200px] sm:justify-center sm:place-items-center grid grid-cols-2 md:grid-cols-2 
       lg:grid-cols-4 gap-4">
-      {relatedProducts.map((relatedProduct: Product) => (
-        <div key={relatedProduct._id}>
-          <ProductCardS
-            image={relatedProduct.imageUrl}
-            proname={relatedProduct.name}
-            proprice={relatedProduct.price}
-            category={relatedProduct.category.name}
-            slug={relatedProduct.slug}
-          />
-        </div>
-      ))}
+      {relatedProducts
+        .filter((relatedProduct: Product) => relatedProduct.category && relatedProduct.category.name)
+        .map((relatedProduct: Product) => (
+          <div key={relatedProduct._id}>
+            <ProductCardS
+              image={relatedProduct.imageUrl}
+              proname={relatedProduct.name}
+              proprice={relatedProduct.price}
+              category={relatedProduct.category!.name}
+              slug={relatedProduct.slug}
+            />
+          </div>
+        ))}
     </div>
   );
 };

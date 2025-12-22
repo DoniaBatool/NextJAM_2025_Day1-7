@@ -175,17 +175,19 @@ export default function Productspage() {
       {/* Product Grid */}
       <div className="max-w-[1280px] mx-auto px-4 md:px-6 mb-[200px] mt-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-[200px] gap-y-[200px]">
-          {products.map((product: Product) => (
-            <div key={product._id}>
-              <ProductCardE
-                image={product.imageUrl}
-                proname={product.name}
-                proprice={product.price}
-                slug={product.slug}
-                category={product.category.name}
-              />
-            </div>
-          ))}
+          {products
+            .filter((product: Product) => product.category && product.category.name)
+            .map((product: Product) => (
+              <div key={product._id}>
+                <ProductCardE
+                  image={product.imageUrl}
+                  proname={product.name}
+                  proprice={product.price}
+                  slug={product.slug}
+                  category={product.category!.name}
+                />
+              </div>
+            ))}
         </div>
 
         {/* View Collection Button */}

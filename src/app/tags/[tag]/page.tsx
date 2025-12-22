@@ -60,18 +60,20 @@ const TagPage = async ({ params }: Props) => {
 
         {/* Product cards container */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6  mb-[200px] gap-y-[250px]">
-          {products.map((product) => (
-            <div key={product._id}>
-              <ProductCardT
-                image={product.imageUrl}
-                proname={product.name}
-                proprice={product.price}
-                slug={product.slug}
-                category={product.category.name}
-                tag={tag}
-              />
-            </div>
-          ))}
+          {products
+            .filter((product) => product.category && product.category.name)
+            .map((product) => (
+              <div key={product._id}>
+                <ProductCardT
+                  image={product.imageUrl}
+                  proname={product.name}
+                  proprice={product.price}
+                  slug={product.slug}
+                  category={product.category!.name}
+                  tag={tag}
+                />
+              </div>
+            ))}
         </div>
       </section>
     </>
