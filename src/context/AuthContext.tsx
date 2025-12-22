@@ -1,129 +1,73 @@
 "use client";
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { User, AuthError } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabaseClient"; // Ensure this is the correct path for your supabaseClient
+import { createContext, useContext, ReactNode } from "react";
+import { useSession, signIn, signUp, signOut } from "@/lib/auth-client";
 
 interface AuthContextType {
-  user: User | null;
-  signInWithEmail: (email: string, password: string) => Promise<AuthError | null>;
-  signUpWithEmail: (email: string, password: string) => Promise<AuthError | null>;
-  signInWithGoogle: () => Promise<void>;
+  user: { id: string; email: string; name?: string; image?: string } | null;
+  signInWithEmail: (email: string, password: string) => Promise<{ error?: { message: string } }>;
+  signUpWithEmail: (email: string, password: string) => Promise<{ error?: { message: string } }>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    // Fetch session from Supabase on initial load
-    const fetchSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error("Error fetching session:", error.message);
-        return;
-      }
-
-      // Set user if session exists
-      if (data.session?.user) {
-        setUser(data.session.user);
-      }
-    };
-
-    fetchSession();
-
-    // Subscribe to auth state changes (for session updates)
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-      }
-    });
-
-    // Cleanup listener on component unmount
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, []);
+  const { data: session } = useSession();
 
   // Sign in with email and password
-  const signInWithEmail = async (email: string, password: string): Promise<AuthError | null> => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      const result = await signIn.email({
+        email,
+        password,
+      });
 
-    if (error) {
-      console.error("Login Error:", error.message);
-      return error;
+      if (result.error) {
+        return { error: { message: result.error.message || "Login failed" } };
+      }
+
+      return {};
+    } catch (error: any) {
+      return { error: { message: error?.message || "An error occurred during login" } };
     }
-
-    setUser(data.user); // Set the user after successful login
-    return null;
   };
 
   // Sign up with email and password
-  const signUpWithEmail = async (email: string, password: string): Promise<AuthError | null> => {
-    const { data, error } = await supabase.auth.signUp({ 
-      email, 
-      password,
-      options: {
-        emailRedirectTo: typeof window !== 'undefined' 
-          ? `${window.location.origin}/auth/callback`
-          : undefined,
+  const signUpWithEmail = async (email: string, password: string) => {
+    try {
+      const result = await signUp.email({
+        email,
+        password,
+      });
+
+      if (result.error) {
+        return { error: { message: result.error.message || "Signup failed" } };
       }
-    });
 
-    if (error) {
-      console.error("Signup Error:", error.message);
-      return error;
-    }
-
-    // If email confirmation is disabled, user is automatically logged in
-    if (data.user && !data.session) {
-      // Email confirmation required
-      return null;
-    } else if (data.user && data.session) {
-      // Auto-logged in (email confirmation disabled)
-      setUser(data.user);
-    }
-
-    return null;
-  };
-
-  // Sign in with Google OAuth
-  const signInWithGoogle = async () => {
-    // Use current origin for redirect URL
-    const redirectUrl = typeof window !== 'undefined' 
-      ? `${window.location.origin}/auth/callback`
-      : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000/auth/callback';
-    
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-
-    if (error) {
-      console.error("Error with Google sign-in:", error.message);
-      throw error;
+      return {};
+    } catch (error: any) {
+      return { error: { message: error?.message || "An error occurred during signup" } };
     }
   };
 
   // Sign out the current user
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      console.error("Logout Error:", error.message);
-    } else {
-      setUser(null); // Clear the user after logging out
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Logout Error:", error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, signInWithEmail, signUpWithEmail, signInWithGoogle, signOut }}>
+    <AuthContext.Provider 
+      value={{ 
+        user: session?.user || null, 
+        signInWithEmail, 
+        signUpWithEmail, 
+        signOut: handleSignOut 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

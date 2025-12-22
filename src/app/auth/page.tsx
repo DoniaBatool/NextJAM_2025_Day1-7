@@ -5,7 +5,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa"; // Correct icons for passwor
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AuthPage() {
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
+  const { signInWithEmail, signUpWithEmail } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
@@ -40,9 +40,9 @@ export default function AuthPage() {
   
     try {
       if (isSignUp) {
-        const error = await signUpWithEmail(email, password);
-        if (error) {
-          setErrorMessage(error.message);
+        const result = await signUpWithEmail(email, password);
+        if (result.error) {
+          setErrorMessage(result.error.message);
         } else {
           setSuccessMessage("Account created successfully! You can now login.");
           // Clear form after successful signup
@@ -51,16 +51,14 @@ export default function AuthPage() {
           setIsSignUp(false);
         }
       } else {
-        const error = await signInWithEmail(email, password);
-        if (error) {
+        const result = await signInWithEmail(email, password);
+        if (result.error) {
           // Check if error is due to invalid credentials
-          if (error.message.toLowerCase().includes("invalid login credentials") || 
-              error.message.toLowerCase().includes("invalid")) {
+          const errorMsg = result.error.message.toLowerCase();
+          if (errorMsg.includes("invalid") || errorMsg.includes("credentials")) {
             setErrorMessage("Invalid email or password. Please try again.");
-          } else if (error.message.toLowerCase().includes("email not confirmed")) {
-            setErrorMessage("Please verify your email before logging in. Check your inbox for the confirmation link.");
           } else {
-            setErrorMessage(error.message || "Login failed. Please check your credentials.");
+            setErrorMessage(result.error.message || "Login failed. Please check your credentials.");
           }
         } else {
           setSuccessMessage("Logged in successfully!");
@@ -136,29 +134,6 @@ export default function AuthPage() {
         {isSignUp ? "Already have an account? Login" : "Don't have an account? Sign Up"}
       </button>
 
-      <hr className="my-6 w-80" />
-
-      <button
-        onClick={async () => {
-          try {
-            setIsLoading(true);
-            setErrorMessage(null);
-            await signInWithGoogle();
-          } catch (error: any) {
-            setErrorMessage(error?.message || "Google sign-in failed. Please try again.");
-          } finally {
-            setIsLoading(false);
-          }
-        }}
-        disabled={isLoading}
-        className="bg-black text-white p-3 rounded-lg mt-4 flex items-center gap-2 hover:bg-slate-800 
-        transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px">
-          <path fill="#4285F4" d="M44.5 20H24v8.5h11.9C34 33.9 30.1 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.8 1.1 8 3l6-6C34.8 4 29.7 2 24 2 11.3 2 1 12.3 1 25s10.3 23 23 23c11.5 0 21.1-8.3 22.8-19H44.5z" />
-        </svg>
-        {isLoading ? "Redirecting..." : "Sign in with Google"}
-      </button>
     </div>
   );
 }

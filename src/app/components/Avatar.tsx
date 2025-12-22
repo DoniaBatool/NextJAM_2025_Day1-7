@@ -16,9 +16,9 @@ const Avatar = () => {
     <div>
       {user ? (
         <div className="flex items-center gap-2 cursor-pointer" onClick={signOut}>
-          {user.user_metadata?.avatar_url ? (
+          {user.image ? (
             <Image
-              src={user.user_metadata.avatar_url}
+              src={user.image}
               alt="User Avatar"
               width={32}
               height={32}
