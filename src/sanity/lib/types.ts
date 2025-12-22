@@ -2,7 +2,7 @@ export type Product = {
     _id: string;
     category: {
         name: string; // Dereferenced name field from category
-      } 
+      } | null;
     name: string;
     description:string;
     price:number;
@@ -11,9 +11,9 @@ export type Product = {
         height: string;
         depth: string;
         width: string;
-      };
+      } | null;
     quantity: number;
-    features: string[]; // Array of strings for features
+    features: string[] | null; // Array of strings for features
     tags: string[];
     imageUrl: string; // Resolved URL from the image asset
 }
