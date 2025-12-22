@@ -39,34 +39,39 @@ async function getProduct(slug: string) {
 
 
 interface Props {
-  params: Promise<{
+  params: {
     slug: string;
     category: string;
-  }>;
+  };
 }
 
 // Generate static parameters for dynamic routes
 export async function generateStaticParams() {
   const products = await sanityFetch({
-    query: `*[_type == "product"]{ "slug": slug.current }`, // Fetch all product slugs
+    query: `*[_type == "product"]{ 
+      "slug": slug.current,
+      "category": category->name
+    }`, // Fetch all product slugs and categories
   });
 
-  return products.map((product: { slug: string }) => ({
+  return products.map((product: { slug: string; category: string }) => ({
     slug: product.slug,
+    category: product.category || "all", // Fallback if category is null
   }));
 }
 
 const ProductDetailPage = async ({ params }: Props) => {
-  const { slug } = await params; // URL se slug lein
-  const product: Product | null = await getProduct(slug); // Sanity se data fetch karein
+  try {
+    const { slug } = params; // URL se slug lein
+    const product: Product | null = await getProduct(slug); // Sanity se data fetch karein
 
-  if (!product) {
-    return (
-      <div className="text-center mt-20">
-        <h1 className="text-2xl font-bold">Product not found</h1>
-      </div>
-    );
-  }
+    if (!product) {
+      return (
+        <div className="text-center mt-20">
+          <h1 className="text-2xl font-bold">Product not found</h1>
+        </div>
+      );
+    }
   //to fetch products related to the category of the main product on the page
   
 
@@ -184,6 +189,15 @@ const ProductDetailPage = async ({ params }: Props) => {
       <Club />
     </main>
   );
+  } catch (error) {
+    console.error("Error loading product:", error);
+    return (
+      <div className="text-center mt-20">
+        <h1 className="text-2xl font-bold">Error loading product</h1>
+        <p className="text-gray-500 mt-4">Please try again later.</p>
+      </div>
+    );
+  }
 };
 
 export default ProductDetailPage;
