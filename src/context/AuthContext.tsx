@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const result = await signUp.email({
         email,
         password,
+        name: email.split('@')[0], // Use email prefix as default name
       });
 
       if (result.error) {
