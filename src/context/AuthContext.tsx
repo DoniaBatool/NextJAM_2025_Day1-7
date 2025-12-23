@@ -62,10 +62,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Transform session user to match AuthContextType
+  const user = session?.user ? {
+    id: session.user.id,
+    email: session.user.email,
+    name: session.user.name || undefined,
+    image: session.user.image || undefined,
+  } : null;
+
   return (
     <AuthContext.Provider 
       value={{ 
-        user: session?.user || null, 
+        user, 
         signInWithEmail, 
         signUpWithEmail, 
         signOut: handleSignOut 
