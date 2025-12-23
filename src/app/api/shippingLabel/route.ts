@@ -28,6 +28,14 @@ interface ShippoResponse {
 
 export async function POST(request: Request) {
   try {
+    // Check if Shippo API key is available
+    if (!process.env.NEXT_PUBLIC_SHIPPO_API_KEY) {
+      return NextResponse.json(
+        { error: "Shipping service is not configured. Please contact support." },
+        { status: 503 }
+      );
+    }
+
     console.log("📩 Receiving request...");
 
     const orderDetails: OrderDetails = await request.json();

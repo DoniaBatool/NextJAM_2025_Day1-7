@@ -25,10 +25,7 @@ export const apiurl= assertValue(
   process.env.NEXT_PUBLIC_API_URL,
   'Missing environment variable: NEXT_PUBLIC_API_URL'
 )
-export const shippo= assertValue(
-  process.env.NEXT_PUBLIC_SHIPPO_API_KEY,
-  'Missing environment variable: NEXT_PUBLIC_SHIPPO_API_KEY'
-)
+export const shippo= process.env.NEXT_PUBLIC_SHIPPO_API_KEY || ''
 
 function assertValue<T>(v: T | undefined, errorMessage: string): T {
   if (v === undefined) {
