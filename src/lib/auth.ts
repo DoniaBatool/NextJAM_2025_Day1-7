@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/prisma";
+import { prismaAdapter } from "@better-auth/prisma";
 import { prisma } from "./prisma";
 
 export const auth = betterAuth({
