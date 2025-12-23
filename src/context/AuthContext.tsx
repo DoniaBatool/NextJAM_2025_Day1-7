@@ -27,8 +27,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       return {};
-    } catch (error: any) {
-      return { error: { message: error?.message || "An error occurred during login" } };
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An error occurred during login";
+      return { error: { message: errorMessage } };
     }
   };
 
@@ -45,8 +46,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       return {};
-    } catch (error: any) {
-      return { error: { message: error?.message || "An error occurred during signup" } };
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An error occurred during signup";
+      return { error: { message: errorMessage } };
     }
   };
 
